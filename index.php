@@ -42,7 +42,8 @@ if( $action == "bid" ) {
 	include( "bids.php" );
 	
 } elseif( $action == 'honor' ) {
-	SendConfirmation();	
+	SendConfirmation();
+	include( "ThankYou.html" );
 
 } elseif( $action == "pledge" ) {
 	include( "pledge.php" );

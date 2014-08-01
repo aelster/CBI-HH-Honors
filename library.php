@@ -1765,7 +1765,7 @@ function PledgeUpdate() {
 	if( $gTrace ) array_pop( $gFunction );
 }
 
-function	SendConfirmation( $bidder_id, $item_id, $bid_id, $send_type ) {
+function	SendConfirmation() {
 	include( 'globals.php' );
 	if( $gTrace ) {
 		$gFunction[] = __FUNCTION__;
@@ -1791,64 +1791,66 @@ function	SendConfirmation( $bidder_id, $item_id, $bid_id, $send_type ) {
 	$html[] = "";
 	$text[] = "";
 	
-	$html[] = sprintf( "Dear %s %s,", $firstName, $lastName );
-	$text[] = sprintf( "Dear %s %s,", $firstName, $lastName );
+	$html[] = sprintf( "Dear %s,", $firstName );
+	$text[] = sprintf( "Dear %s,", $firstName );
 
 	$html[] = "";
 	$text[] = "";
 	
-	if( $send_type == $gSendTop ) {
-		$html[] = sprintf( "You now have the top bid of \$ %s for the following item:", number_format( $bid['bid'], 2 ) );
-		$text[] = sprintf( "You now have the top bid of \$ %s for the following item:", number_format( $bid['bid'], 2 ) );
-	} elseif( $send_type == $gSendOld ) {
-		$html[] = sprintf( "You have been replaced as the top bidder for the following item:" );
-		$text[] = sprintf( "You have been replaced as the top bidder for the following item:" );
-	} elseif( $send_type == $gSendBought ) {
-		$html[] = sprintf( "Your have just purchased the following item with a bid of \$ %s:", number_format( $bid['bid'], 2 ) );
-		$text[] = sprintf( "Your have just purchased the following item with a bid of \$ %s:", number_format( $bid['bid'], 2 ) );
-	} elseif( $send_type == $gSendOldBought ) {
-		$html[] = sprintf( "We're sorry, somebody else just purchased the following item:" );
-		$text[] = sprintf( "We're sorry, somebody else just purchased the following item:" );
+	$button = $_POST['RadioGroup2'];
+	if( $button == 'accept' ) {
+		$html[] = sprintf( "Thank you for allowing us to honor you." );
+		$text[] = sprintf( "Thank you for allowing us to honor you." );
+		
+	} elseif( $button == 'decline' ) {
+		$html[] = sprintf( "Thank you for letting us know you are declining your honor." );
+		$text[] = sprintf( "Thank you for letting us know you are declining your honor." );
+
 	}
+
+	$amount = $_POST['hh-amount'];
+	if( ! empty( $amount ) ) {
+		$html[] = sprintf( "  In addition, thank you for your generous donation of \$ %s.", number_format( $amount, 2 ) );
+		$text[] = sprintf( "  In addition, thank you for your generous donation of \$ %s.", number_format( $amount, 2 ) );
+
+		$html[] = "";
+		$text[] = "";
 	
-	$html[] = "";
-	$text[] = "";
-	
-	$html[] = sprintf( "&nbsp;&nbsp;&nbsp;%s", $item['itemTitle'] );
-	$text[] = sprintf( "   %s", $item['itemTitle'] );
+		$payment = $_POST['hh-payment'];
+		if( $payment == 'credit' ) {
+			$html[] = sprintf( "  We will be charging your credit card on file." );
+			$text[] = sprintf( "  We will be charging your credit card on file." );
+		} elseif( $payment == 'check' ) {
+			$html[] = sprintf( "  We will be expecting your check in the next few days." );
+			$text[] = sprintf( "  We will be expecting your check in the next few days." );
+		} elseif( $payment == 'call' ) {
+			$html[] = sprintf( "  We will be contacting you to arrange for payment." );
+			$text[] = sprintf( "  We will be contacting you to arrange for payment." );
+		}
+	}
 		
 	$html[] = "";
 	$text[] = "";
 	
-	if( $send_type == $gSendBought ) {
-		$html[] = "Please contact Helene Coulter at hcoulter@cbi18.org or call 714-730-9693 to arrange payment and pickup of your item.";	
-		$text[] = "Please contact Helene Coulter at hcoulter@cbi18.org or call 714-730-9693 to arrange payment and pickup of your item.";
-	
-		$html[] = "";
-		$text[] = "";	
-	}
-	
-	if( $send_type == $gSendOld ) {
-		$html[] = "Click here to view the current bid: http://www.cbi18.org/auction/?id=$item_id";
-		$text[] = "Click here to view the current bid: http://www.cbi18.org/auction/?id=$item_id";
-	
+	$comment = $_POST['hh-comment'];
+	if( ! empty( $comment ) ) {
+		$html[] = sprintf( "We appreciate your following comments:" );
+		$text[] = sprintf( "We appreciate your following comments:" );
 		$html[] = "";
 		$text[] = "";
+		$html[] = $comment;
+		$text[] = $comment;
+		
 	}
 	
-	$html[] = "";
-	$text[] = "";
-	
-	$message->setTo( array( $email => "$firstName $lastName" ) );
+	$message->setTo( array( $email => "$firstName" ) );
 	$message->setFrom(array('cbi18@cbi18.org' => 'CBI'));
-	if( $send_type == $gSendBought ) {
-		$message->setCc(array(
-			'hcoulter@cbi18.org' => 'Helene Coulter'
-		));
-	}
 	$message->setBcc(array(
-						'andy.elster@gmail.com' => 'Andy Elster',
-						) );
+		'cbi18@cbi18.org' => 'Debbie Hebron',
+		'bertil@askelid.com' => 'Bertil Askelid',
+		'bethelster1@gmail.com' => 'Beth Elster',
+		'andy.elster@gmail.com' => 'Andy Elster'
+	) );
 
 	$message
 	->setBody( join('<br>',$html), 'text/html' )
